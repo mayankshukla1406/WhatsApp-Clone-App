@@ -1,5 +1,6 @@
 package com.example.whatsapp.presentation
 
+import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,7 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class OTPFragment : BottomSheetDialogFragment() {
+class OTPFragment : BottomSheetDialogFragment(),IViewsHandling {
 
     private var binding : FragmentOTPBinding? = null
 
@@ -24,6 +25,7 @@ class OTPFragment : BottomSheetDialogFragment() {
         binding = FragmentOTPBinding.inflate(inflater,container,false)
         setUpOTPInput()
         requireDialog().setTitle("Otp Verification")
+
         return binding!!.root
     }
 
@@ -141,5 +143,9 @@ class OTPFragment : BottomSheetDialogFragment() {
 
             })
         }
+    }
+
+    override fun dismissOtpBottomSheetDialogFragment() {
+        dismiss()
     }
 }

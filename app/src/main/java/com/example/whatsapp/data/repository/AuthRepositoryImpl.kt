@@ -1,5 +1,6 @@
 package com.example.whatsapp.data.repository
 
+import com.example.whatsapp.domain.model.User
 import com.example.whatsapp.domain.repository.AuthRepository
 import com.example.whatsapp.presentation.MainActivity
 import com.example.whatsapp.util.Resource
@@ -8,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -24,6 +26,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class AuthRepositoryImpl @Inject constructor(
     var firebaseAuth: FirebaseAuth,
+    var firebaseFirestore: FirebaseFirestore,
 ) : AuthRepository {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -110,5 +113,21 @@ class AuthRepositoryImpl @Inject constructor(
                     )
                 }
         }
+
+    override fun createUserProfile(user: User, userId : String): Flow<Resource<Boolean>> = callbackFlow {
+        try {
+            trySend(Resource.Loading)
+            firebaseFirestore.collection("users").document(userId).set(user)
+                .addOnSuccessListener {
+                    trySend(Resource.Success<Boolean>(true))
+                }
+                .addOnFailureListener {
+                    trySend(Resource.Error("User Profile Creation Failed due to ${it.localizedMessage}"))
+                }
+            awaitClose()
+        } catch (e: java.lang.Exception) {
+            trySend(Resource.Error("User Profile Creation Failed due to ${e.localizedMessage}"))
+        }
+    }
 
 }

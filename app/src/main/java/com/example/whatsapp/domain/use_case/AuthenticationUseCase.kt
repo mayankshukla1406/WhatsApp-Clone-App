@@ -1,5 +1,6 @@
 package com.example.whatsapp.domain.use_case
 
+import com.example.whatsapp.domain.model.User
 import com.example.whatsapp.domain.repository.AuthRepository
 import com.example.whatsapp.presentation.MainActivity
 import com.google.firebase.auth.PhoneAuthCredential
@@ -15,5 +16,6 @@ class AuthenticationUseCase @Inject constructor(
 
     fun getUserId() = authRepository.getUserId()
 
-    suspend fun signInWithAuthCredential(phoneAuthCredential: PhoneAuthCredential) = authRepository.signInWithAuthCredential(phoneAuthCredential)
+    fun createProfile(user : User,userId : String) = authRepository.createUserProfile(user,userId)
+
 }

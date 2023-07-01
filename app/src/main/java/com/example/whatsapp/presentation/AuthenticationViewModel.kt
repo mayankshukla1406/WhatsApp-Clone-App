@@ -1,13 +1,12 @@
 package com.example.whatsapp.presentation
 
-import android.service.voice.VoiceInteractionSession.ActivityId
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.whatsapp.domain.model.User
 import com.example.whatsapp.domain.use_case.AuthenticationUseCase
 import com.example.whatsapp.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,20 +15,47 @@ class AuthenticationViewModel @Inject constructor(
     private val authUseCase: AuthenticationUseCase,
 ) : ViewModel() {
 
+    private lateinit var iViewsHandling : IViewsHandling
+
     fun signInWithPhoneNumber(phoneNumber: String, activity: MainActivity) {
+        iViewsHandling = activity
         viewModelScope.launch {
             authUseCase.phoneNumberSignIn(phoneNumber, activity).collect {
                 when (it) {
                     is Resource.Loading -> {
-                        Toast.makeText(activity.baseContext,"Loading",Toast.LENGTH_LONG).show()
+                        iViewsHandling.showProgressBar()
                     }
 
                     is Resource.Error -> {
-                        Toast.makeText(activity.baseContext,"ERROR",Toast.LENGTH_LONG).show()
+                        iViewsHandling.showError(it.message?:"Some Error Occurred")
                     }
 
                     is Resource.Success -> {
-                        Toast.makeText(activity.baseContext,"SUCCESS",Toast.LENGTH_LONG).show()
+                        iViewsHandling.hideProgressBar()
+                        iViewsHandling.changeViewsVisibility()
+                        iViewsHandling.dismissOtpBottomSheetDialogFragment()
+                    }
+                }
+            }
+        }
+    }
+
+    fun createUserProfile(userName : String, userNumber : String) {
+        val modelUser : User = User(userName,userNumber,"","")
+        viewModelScope.launch {
+            authUseCase.createProfile(user = modelUser, authUseCase.getUserId()).collectLatest {
+                when(it) {
+                    is Resource.Loading -> {
+                        iViewsHandling.showProgressBar()
+                    }
+
+                    is Resource.Error -> {
+                        iViewsHandling.showError(it.message?:"Some Error Occurred")
+                    }
+
+                    is Resource.Success -> {
+                        iViewsHandling.hideProgressBar()
+                        iViewsHandling.showHomePage()
                     }
                 }
             }
