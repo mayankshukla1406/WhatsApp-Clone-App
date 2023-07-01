@@ -3,14 +3,21 @@ package com.example.whatsapp.presentation
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.activity.viewModels
-import androidx.core.view.isVisible
 import com.example.whatsapp.R
 import com.example.whatsapp.databinding.ActivityMainBinding
+import com.google.rpc.context.AttributeContext.Auth
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityMainBinding
+    private val authenticationViewModel : AuthenticationViewModel by viewModels()
+
+    var otpValue = MutableStateFlow<String>("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,14 +35,18 @@ class MainActivity : AppCompatActivity() {
             binding.etNumber.visibility = View.VISIBLE
             binding.btProceed.visibility = View.VISIBLE
         }
+        binding.btProceed.setOnClickListener {
+            authenticationViewModel.signInWithPhoneNumber("+91 ${binding.etNumber.text.toString()}",this)
+        }
     }
 
     private fun checkAuthenticationStatus(): Boolean {
         return false
     }
 
-    fun showBottomSheet(verificationId : String) {
-
+    fun showBottomSheet() {
+        val otpFragment = OTPFragment()
+        supportFragmentManager.beginTransaction().add(otpFragment,"bottomSheetOtpFragment").commit()
     }
 }
 
