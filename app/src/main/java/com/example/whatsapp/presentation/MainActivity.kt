@@ -3,15 +3,13 @@ package com.example.whatsapp.presentation
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import com.example.whatsapp.R
 import com.example.whatsapp.databinding.ActivityMainBinding
+import com.example.whatsapp.presentation.HomePageLayout.HomePageFragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.rpc.context.AttributeContext.Auth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -31,7 +29,7 @@ class MainActivity : AppCompatActivity(),IViewsHandling {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         if(checkAuthenticationStatus()) {
-
+            openHomePage()
         } else {
             binding.userAuthenticationLayout.visibility = View.VISIBLE
             binding.appLogo.visibility = View.VISIBLE
@@ -58,11 +56,10 @@ class MainActivity : AppCompatActivity(),IViewsHandling {
         binding.userNameLayout.visibility = View.VISIBLE
         binding.textInputLayout2.visibility = View.VISIBLE
         binding.etName.visibility = View.VISIBLE
-
     }
 
     private fun checkAuthenticationStatus(): Boolean {
-        return false
+        return authenticationViewModel.isUserAuthenticated()
     }
 
     fun showBottomSheet() {
@@ -71,7 +68,26 @@ class MainActivity : AppCompatActivity(),IViewsHandling {
     }
 
     override fun showHomePage() {
-        Toast.makeText(this.applicationContext,"This is a Home Page",Toast.LENGTH_LONG).show()
+        openHomePage()
+    }
+
+    private fun openHomePage() {
+        setAllMainActivityViewsGone()
+        binding.fragmentContainer.visibility = View.VISIBLE
+        val homePageFragment = HomePageFragment()
+        supportFragmentManager.beginTransaction().add(R.id.fragmentContainer,homePageFragment,"homePageFragment").commit()
+    }
+
+    private fun setAllMainActivityViewsGone() {
+        binding.userAuthenticationLayout.visibility = View.GONE
+        binding.appLogo.visibility = View.GONE
+        binding.userNumberLayout.visibility = View.GONE
+        binding.textInputLayout1.visibility = View.GONE
+        binding.etNumber.visibility = View.GONE
+        binding.btProceed.visibility = View.GONE
+        binding.userNameLayout.visibility = View.GONE
+        binding.textInputLayout2.visibility = View.GONE
+        binding.etName.visibility = View.GONE
     }
 
     override fun showProgressBar() {
@@ -88,7 +104,7 @@ class MainActivity : AppCompatActivity(),IViewsHandling {
     }
 
     override fun dismissOtpBottomSheetDialogFragment() {
-        var fragment = supportFragmentManager.findFragmentByTag("bottomSheetOtpFragment")
+        val fragment = supportFragmentManager.findFragmentByTag("bottomSheetOtpFragment")
         if(fragment!=null) {
             (fragment as BottomSheetDialogFragment).dismiss()
         }

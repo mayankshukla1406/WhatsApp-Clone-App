@@ -62,4 +62,6 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 
+    fun isUserAuthenticated() = authUseCase.isUserAuthenticated()
+
 }

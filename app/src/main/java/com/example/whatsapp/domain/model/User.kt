@@ -1,8 +1,8 @@
 package com.example.whatsapp.domain.model
 
 data class User(
-    val name: String?,
-    val number: String?,
-    val image : String?,
-    val status: String?,
+    val userName: String?,
+    val userNumber: String?,
+    val userImage : String?,
+    val userStatus: String?,
 )

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <item
+        android:id="@+id/menu_search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/invite_a_friend"
+        android:title="@string/invite_a_friend" />
+    <item
+        android:id="@+id/contacts"
+        android:title = "@string/contacts" />
+    <item
+        android:id="@+id/refresh"
+        android:title="@string/refresh" />
+    <item
+        android:id="@+id/help"
+        android:title="Help" />
+
+</menu>

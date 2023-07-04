@@ -6,4 +6,15 @@
     </style>
 
     <style name="Theme.WhatsApp" parent="Base.Theme.WhatsApp" />
+
+    <style name="ToolbarTheme" parent="Widget.AppCompat.Toolbar">
+        <!-- Add any other attributes you want to customize -->
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
+
+    <style name="TabLayoutTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">16sp</item>
+        <!-- Set your desired text size -->
+    </style>
+
 </resources>

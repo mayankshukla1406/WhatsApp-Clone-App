@@ -1,8 +1,11 @@
 package com.example.whatsapp.di
 
 import com.example.whatsapp.data.repository.AuthRepositoryImpl
+import com.example.whatsapp.data.repository.ContactsRepositoryImpl
 import com.example.whatsapp.domain.repository.AuthRepository
+import com.example.whatsapp.domain.repository.ContactsRepository
 import com.example.whatsapp.domain.use_case.AuthenticationUseCase
+import com.example.whatsapp.domain.use_case.ContactsUseCase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
@@ -38,6 +41,18 @@ object WhatsAppModule {
     @Singleton
     fun provideAuthenticationUseCase(authRepository: AuthRepository) : AuthenticationUseCase {
         return AuthenticationUseCase(authRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideContactsRespository(firestore: FirebaseFirestore) : ContactsRepository {
+        return ContactsRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideContactsUseCase(repository: ContactsRepository) : ContactsUseCase {
+        return ContactsUseCase(repository)
     }
 
 }

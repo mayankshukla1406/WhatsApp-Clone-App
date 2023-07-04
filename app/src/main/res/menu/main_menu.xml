@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <item
+        android:id="@+id/menu_camera"
+        android:icon="@drawable/ic_camera"
+        android:title="@string/camera"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+    <item
+        android:id="@+id/menu_search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/create_new_group"
+        android:title="@string/new_group" />
+    <item
+        android:id="@+id/create_new_broadcast"
+        android:title="@string/new_broadcast" />
+    <item
+        android:id="@+id/linked_devices"
+        android:title="@string/linked_devices" />
+    <item
+        android:id="@+id/starred_message"
+        android:title="@string/starred_messages" />
+    <item
+        android:id="@+id/payments"
+        android:title="@string/payments" />
+    <item
+        android:id="@+id/settings"
+        android:title="@string/settings" />
+
+</menu>
