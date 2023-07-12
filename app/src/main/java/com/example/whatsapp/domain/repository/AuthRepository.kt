@@ -1,5 +1,6 @@
 package com.example.whatsapp.domain.repository
 
+import com.example.whatsapp.domain.model.User
 import com.example.whatsapp.presentation.MainActivity
 import com.example.whatsapp.util.Resource
 import com.google.firebase.auth.PhoneAuthCredential
@@ -14,4 +15,6 @@ interface AuthRepository {
     fun getUserId() : String
 
     suspend fun signInWithAuthCredential(phoneAuthCredential: PhoneAuthCredential) : Resource<Boolean>
+
+    fun createUserProfile(user : User,userId : String) : Flow<Resource<Boolean>>
 }

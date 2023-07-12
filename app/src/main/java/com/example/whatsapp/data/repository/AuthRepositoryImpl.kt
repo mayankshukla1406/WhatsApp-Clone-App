@@ -1,6 +1,6 @@
 package com.example.whatsapp.data.repository
 
-import androidx.core.content.contentValuesOf
+import com.example.whatsapp.domain.model.User
 import com.example.whatsapp.domain.repository.AuthRepository
 import com.example.whatsapp.presentation.MainActivity
 import com.example.whatsapp.util.Resource
@@ -9,12 +9,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -22,6 +26,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class AuthRepositoryImpl @Inject constructor(
     var firebaseAuth: FirebaseAuth,
+    var firebaseFirestore: FirebaseFirestore,
 ) : AuthRepository {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -29,14 +34,14 @@ class AuthRepositoryImpl @Inject constructor(
     override fun phoneNumberSignIn(
         phoneNumber: String,
         activity: MainActivity,
-    ): Flow<Resource<Boolean>> = flow {
+    ): Flow<Resource<Boolean>> = channelFlow {
         try {
-            emit(Resource.Loading)
+            trySend(Resource.Loading).isSuccess
             val options = PhoneAuthOptions.newBuilder(firebaseAuth)
                 .setPhoneNumber(phoneNumber)
                 .setActivity(activity)
-                .setTimeout(60,TimeUnit.SECONDS)
-                .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks(){
+                .setTimeout(60, TimeUnit.SECONDS)
+                .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     override fun onVerificationCompleted(p0: PhoneAuthCredential) {
                         coroutineScope.launch {
                             signInWithAuthCredential(p0)
@@ -45,20 +50,42 @@ class AuthRepositoryImpl @Inject constructor(
 
                     override fun onVerificationFailed(p0: FirebaseException) {
                         coroutineScope.launch {
-                            emit(Resource.Error(p0.localizedMessage?:"An Error Occurred"))
+                            trySend(
+                                Resource.Error(
+                                    p0.localizedMessage ?: "An Error Occurred"
+                                )
+                            ).isSuccess
                         }
                     }
 
-                    override fun onCodeSent(verificationId : String, p1: PhoneAuthProvider.ForceResendingToken) {
-                        super.onCodeSent(verificationId, p1)
+                    override fun onCodeSent(
+                        verificationId: String,
+                        p1: PhoneAuthProvider.ForceResendingToken,
+                    ) {
                         coroutineScope.launch {
-                            activity.showBottomSheet(verificationId)
+                            withContext(Dispatchers.Main) {
+                                activity.showBottomSheet()
+                            }
+                            activity.otpValue.collect {
+                                if (it.isNotBlank()) {
+                                    trySend(
+                                        (signInWithAuthCredential(
+                                            PhoneAuthProvider.getCredential(
+                                                verificationId,
+                                                it
+                                            )
+                                        ))
+                                    ).isSuccess
+                                }
+                            }
                         }
                     }
 
-                })
-        } catch (exception : Exception) {
-            Resource.Error(exception.localizedMessage?:"An Error Occurred")
+                }).build()
+            PhoneAuthProvider.verifyPhoneNumber(options)
+            awaitClose()
+        } catch (exception: Exception) {
+            Resource.Error(exception.localizedMessage ?: "An Error Occurred")
         }
     }
 
@@ -73,12 +100,34 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun signInWithAuthCredential(phoneAuthCredential: PhoneAuthCredential): Resource<Boolean> =
-        suspendCoroutine {continuation->
+        suspendCoroutine { continuation ->
             firebaseAuth.signInWithCredential(phoneAuthCredential)
-                .addOnSuccessListener { continuation.resume(Resource.Success(true)) }
-                .addOnFailureListener {exception->
-                    continuation.resume(Resource.Error(exception.localizedMessage?:"An Error Occured"))
+                .addOnSuccessListener {
+                    continuation.resume(Resource.Success(true))
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resume(
+                        Resource.Error(
+                            exception.localizedMessage ?: "An Error Occured"
+                        )
+                    )
                 }
         }
+
+    override fun createUserProfile(user: User, userId : String): Flow<Resource<Boolean>> = callbackFlow {
+        try {
+            trySend(Resource.Loading)
+            firebaseFirestore.collection("users").document(userId).set(user)
+                .addOnSuccessListener {
+                    trySend(Resource.Success<Boolean>(true))
+                }
+                .addOnFailureListener {
+                    trySend(Resource.Error("User Profile Creation Failed due to ${it.localizedMessage}"))
+                }
+            awaitClose()
+        } catch (e: java.lang.Exception) {
+            trySend(Resource.Error("User Profile Creation Failed due to ${e.localizedMessage}"))
+        }
+    }
 
 }
