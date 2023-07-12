@@ -41,9 +41,9 @@ class AuthenticationViewModel @Inject constructor(
     }
 
     fun createUserProfile(userName : String, userNumber : String) {
-        val modelUser : User = User(userName,userNumber,"","")
+        val modelUser : User = User(authUseCase.getUserId(),userName,userNumber,"","")
         viewModelScope.launch {
-            authUseCase.createProfile(user = modelUser, authUseCase.getUserId()).collectLatest {
+            authUseCase.createProfile(user = modelUser).collectLatest {
                 when(it) {
                     is Resource.Loading -> {
                         iViewsHandling.showProgressBar()

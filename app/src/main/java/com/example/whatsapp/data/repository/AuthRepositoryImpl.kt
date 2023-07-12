@@ -16,7 +16,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -114,10 +113,10 @@ class AuthRepositoryImpl @Inject constructor(
                 }
         }
 
-    override fun createUserProfile(user: User, userId : String): Flow<Resource<Boolean>> = callbackFlow {
+    override fun createUserProfile(user: User): Flow<Resource<Boolean>> = callbackFlow {
         try {
             trySend(Resource.Loading)
-            firebaseFirestore.collection("users").document(userId).set(user)
+            firebaseFirestore.collection("users").document(user.userId).set(user)
                 .addOnSuccessListener {
                     trySend(Resource.Success<Boolean>(true))
                 }

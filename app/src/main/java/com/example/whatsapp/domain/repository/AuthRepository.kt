@@ -16,5 +16,5 @@ interface AuthRepository {
 
     suspend fun signInWithAuthCredential(phoneAuthCredential: PhoneAuthCredential) : Resource<Boolean>
 
-    fun createUserProfile(user : User,userId : String) : Flow<Resource<Boolean>>
+    fun createUserProfile(user: User) : Flow<Resource<Boolean>>
 }

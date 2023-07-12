@@ -3,7 +3,6 @@ package com.example.whatsapp.domain.use_case
 import com.example.whatsapp.domain.model.User
 import com.example.whatsapp.domain.repository.AuthRepository
 import com.example.whatsapp.presentation.MainActivity
-import com.google.firebase.auth.PhoneAuthCredential
 import javax.inject.Inject
 
 class AuthenticationUseCase @Inject constructor(
@@ -16,6 +15,6 @@ class AuthenticationUseCase @Inject constructor(
 
     fun getUserId() = authRepository.getUserId()
 
-    fun createProfile(user : User,userId : String) = authRepository.createUserProfile(user,userId)
+    fun createProfile(user: User) = authRepository.createUserProfile(user)
 
 }
