@@ -31,17 +31,18 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class HomePageFragment : Fragment() {
 
-    private lateinit var binding : FragmentHomePageBinding
-    private lateinit var toolbar : MaterialToolbar
-    private lateinit var toolbarTitle : TextView
+    private lateinit var binding: FragmentHomePageBinding
+    private lateinit var toolbar: MaterialToolbar
+    private lateinit var toolbarTitle: TextView
     private lateinit var viewPager: ViewPager2
     private lateinit var tabLayout: TabLayout
-    private lateinit var fabShowContacts : FloatingActionButton
+    private lateinit var fabShowContacts: FloatingActionButton
 
 
     val fragmentList = arrayListOf(
@@ -56,7 +57,9 @@ class HomePageFragment : Fragment() {
         ) { isGranted ->
             if (isGranted) {
                 activity?.let {
-                    it.supportFragmentManager.beginTransaction().add(R.id.fragmentContainer,ContactsFragment(),"contacts_fragment").commit()
+                    it.supportFragmentManager.beginTransaction()
+                        .add(R.id.fragmentContainer, ContactsFragment(), "contacts_fragment")
+                        .addToBackStack("contacts_fragment").commit()
                 }
             } else {
                 if (shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS)) {
@@ -64,6 +67,7 @@ class HomePageFragment : Fragment() {
                 }
             }
         }
+
     private fun launchContactsLauncherOnceAgain() {
         context?.let {
             AlertDialog.Builder(it)
@@ -84,15 +88,15 @@ class HomePageFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
-        binding = FragmentHomePageBinding.inflate(layoutInflater,container,false)
+        binding = FragmentHomePageBinding.inflate(layoutInflater, container, false)
         viewPager = binding.viewPager
         tabLayout = binding.tabLayout
-        toolbar   = binding.toolbar
+        toolbar = binding.toolbar
         toolbarTitle = binding.toolbarTitle
         fabShowContacts = binding.fabShowContacts
         fabShowContacts.outlineProvider = OutlineProvider()
         fabShowContacts.clipToOutline = true
-        val window : Window = requireActivity().window
+        val window: Window = requireActivity().window
         window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.Green1)
         binding.fabShowContacts.setOnClickListener {
             requestReadContactsLauncher.launch(android.Manifest.permission.READ_CONTACTS)
@@ -107,7 +111,7 @@ class HomePageFragment : Fragment() {
 
     private fun setUpViewPagerAndTabLayout() {
 
-        viewPager.adapter = object : FragmentStateAdapter(childFragmentManager,lifecycle) {
+        viewPager.adapter = object : FragmentStateAdapter(childFragmentManager, lifecycle) {
             override fun getItemCount(): Int = fragmentList.size
             override fun createFragment(position: Int): Fragment = fragmentList[position]
         }
@@ -140,7 +144,7 @@ class HomePageFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.main_menu,menu)
+        inflater.inflate(R.menu.main_menu, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -185,7 +189,9 @@ class HomePageFragment : Fragment() {
                 true
             }
 
-            else -> {false}
+            else -> {
+                false
+            }
         }
     }
 

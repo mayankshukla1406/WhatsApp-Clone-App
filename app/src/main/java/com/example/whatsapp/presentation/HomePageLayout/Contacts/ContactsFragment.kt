@@ -45,7 +45,7 @@ class ContactsFragment : Fragment(), IContactsViews {
         deviceContacts = ContactsManager(requireContext()).getContacts()
 
         deviceContacts.map {
-            it.replace("+91","").replace(" ","")
+            it.replace("+91", "").replace(" ", "")
         }
         return binding!!.root
     }
@@ -68,10 +68,11 @@ class ContactsFragment : Fragment(), IContactsViews {
                 binding.recyclerView.adapter = contactsAdapter
                 CoroutineScope(Dispatchers.IO).launch {
                     contactsViewModel.whatsAppContactsList.collectLatest {
-                        if(it.isNotEmpty()) {
+                        if (it.isNotEmpty()) {
                             contactsAdapter.submitList(it)
                             withContext(Dispatchers.Main) {
-                                binding.subtitleText.text = "${contactsAdapter.currentList.size} Contacts"
+                                binding.subtitleText.text =
+                                    "${contactsAdapter.currentList.size} Contacts"
                             }
                         }
                     }
@@ -97,6 +98,6 @@ class ContactsFragment : Fragment(), IContactsViews {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.contact_fragment_menu,menu)
+        inflater.inflate(R.menu.contact_fragment_menu, menu)
     }
 }

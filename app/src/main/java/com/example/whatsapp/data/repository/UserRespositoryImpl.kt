@@ -1,8 +1,10 @@
 package com.example.whatsapp.data.repository
 
+import android.view.Display.Mode
 import com.example.whatsapp.data.database.UserDao
+import com.example.whatsapp.domain.model.ModelChat
 import com.example.whatsapp.domain.model.User
-import com.example.whatsapp.domain.repository.ContactsRepository
+import com.example.whatsapp.domain.repository.UserRespository
 import com.example.whatsapp.util.Resource
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
@@ -10,17 +12,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import javax.inject.Inject
 
-class ContactsRepositoryImpl @Inject constructor(
+class UserRespositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val userDao: UserDao
-) : ContactsRepository {
+) : UserRespository {
 
-    override fun getAllUsers(deviceContacts: List<String>): Flow<Resource<List<User>>> = channelFlow {
+    override fun getAllContacts(deviceContacts: List<String>): Flow<Resource<List<User>>> = channelFlow {
         try {
             trySend(Resource.Loading)
             val contacts = userDao.getAllUsers().firstOrNull()
@@ -49,6 +53,43 @@ class ContactsRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             trySend(Resource.Error(e.localizedMessage?:"An Error Occurred"))
         }
+    }
+
+    override fun getAllChats(userId : String): Flow<Resource<List<ModelChat>>> = callbackFlow {
+        try {
+            trySend(Resource.Loading)
+            val query = firestore.collection("chats").whereArrayContains("chatParticipants",userId)
+            val listener = query.addSnapshotListener { snapshot,exception->
+                if (exception != null) {
+                    trySend(Resource.Error(exception.localizedMessage ?: "An Error Occurred"))
+                    return@addSnapshotListener
+                }
+                snapshot?.let { documents ->
+                    val chats = mutableListOf<ModelChat>()
+                    for (document in documents) {
+                        val chat = getChatFromDocument(document)
+                        chats.add(chat)
+                    }
+                    trySend(Resource.Success(chats))
+                }
+            }
+            awaitClose {
+                listener.remove()
+            }
+        } catch (exception : Exception) {
+            trySend(Resource.Error(exception.localizedMessage?:"An Error Occurred"))
+        }
+    }
+
+    private fun getChatFromDocument(document: QueryDocumentSnapshot): ModelChat {
+        return ModelChat(
+            chatId = document.id,
+            chatParticipants = document.get("chatParticipants") as List<String>,
+            chatImage = document.get("chatImage") as String,
+            chatName = document.get("chatName") as String,
+            chatLastMessage = document.get("chatLastMessage") as String,
+            chatLastMessageTimestamp = document.get("chatLastMessageTimestamp") as String
+        )
     }
 
     private fun getUserFromDocument(document : QueryDocumentSnapshot) : User {

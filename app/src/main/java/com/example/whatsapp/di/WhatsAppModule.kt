@@ -5,9 +5,9 @@ import androidx.room.Room
 import com.example.whatsapp.data.database.UserDao
 import com.example.whatsapp.data.database.UserDataBase
 import com.example.whatsapp.data.repository.AuthRepositoryImpl
-import com.example.whatsapp.data.repository.ContactsRepositoryImpl
+import com.example.whatsapp.data.repository.UserRespositoryImpl
 import com.example.whatsapp.domain.repository.AuthRepository
-import com.example.whatsapp.domain.repository.ContactsRepository
+import com.example.whatsapp.domain.repository.UserRespository
 import com.example.whatsapp.domain.use_case.AuthenticationUseCase
 import com.example.whatsapp.domain.use_case.ContactsUseCase
 import com.example.whatsapp.util.Constants
@@ -72,16 +72,16 @@ object WhatsAppModule {
 
     @Singleton
     @Provides
-    fun provideContactsRespository(
+    fun provideUserRepository(
         firestore: FirebaseFirestore,
         userDao: UserDao,
-    ): ContactsRepository {
-        return ContactsRepositoryImpl(firestore, userDao)
+    ): UserRespository {
+        return UserRespositoryImpl(firestore, userDao)
     }
 
     @Provides
     @Singleton
-    fun provideContactsUseCase(repository: ContactsRepository): ContactsUseCase {
+    fun provideContactsUseCase(repository: UserRespository): ContactsUseCase {
         return ContactsUseCase(repository)
     }
 
