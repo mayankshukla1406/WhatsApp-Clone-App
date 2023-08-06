@@ -9,4 +9,6 @@ class ChatUseCase @Inject constructor(
 
     fun getAllChats(userId : String) = userRespository.getAllChats(userId)
 
+    fun getAllMessagesOfChat(chatId : String) = userRespository.getAllMessagesOfChat(chatId)
+
 }

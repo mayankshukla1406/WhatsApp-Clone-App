@@ -1,8 +1,8 @@
 package com.example.whatsapp.data.repository
 
-import android.view.Display.Mode
 import com.example.whatsapp.data.database.UserDao
 import com.example.whatsapp.domain.model.ModelChat
+import com.example.whatsapp.domain.model.ModelMessage
 import com.example.whatsapp.domain.model.User
 import com.example.whatsapp.domain.repository.UserRespository
 import com.example.whatsapp.util.Resource
@@ -81,6 +81,31 @@ class UserRespositoryImpl @Inject constructor(
         }
     }
 
+    override fun getAllMessagesOfChat(chatId: String): Flow<Resource<List<ModelMessage>>> = callbackFlow {
+        try {
+            trySend(Resource.Loading)
+            val listener = firestore.collection("chats").document(chatId).collection("messages").addSnapshotListener { snapshot, exception ->
+                if (exception != null) {
+                    trySend(Resource.Error(exception.localizedMessage ?: "An Error Occurred"))
+                    return@addSnapshotListener
+                }
+                snapshot?.let { documents ->
+                    val messages = mutableListOf<ModelMessage>()
+                    for (document in documents) {
+                        val messageModel = getMessageFromDocument(document)
+                        messages.add(messageModel)
+                    }
+                    trySend(Resource.Success(messages))
+                }
+            }
+            awaitClose {
+                listener.remove()
+            }
+        } catch (exception : Exception) {
+            trySend(Resource.Error(exception.localizedMessage?:"An Error Occurred"))
+        }
+    }
+
     private fun getChatFromDocument(document: QueryDocumentSnapshot): ModelChat {
         return ModelChat(
             chatId = document.id,
@@ -98,6 +123,15 @@ class UserRespositoryImpl @Inject constructor(
             userImage = document.getString("userImage"),
             userStatus = document.getString("userStatus"),
             userId = document.id
+        )
+    }
+
+    private fun getMessageFromDocument(document: QueryDocumentSnapshot) : ModelMessage {
+        return ModelMessage(
+            messageData = document.get("messageData").toString(),
+            messageType = document.get("messageType").toString(),
+            messageReceiver = document.get("messageReceiver").toString(),
+            messageSender = document.get("messageSender").toString()
         )
     }
 }

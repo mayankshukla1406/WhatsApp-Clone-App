@@ -8,4 +8,5 @@ interface IViewsHandling {
     fun changeViewsVisibility() {}
     fun showHomePage() {}
     fun dismissOtpBottomSheetDialogFragment() {}
+    fun getUserId() : String
 }

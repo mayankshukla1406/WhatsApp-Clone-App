@@ -110,6 +110,10 @@ class MainActivity : AppCompatActivity(),IViewsHandling {
         }
     }
 
+    override fun getUserId() : String {
+        return authenticationViewModel.getUserId()
+    }
+
     override fun onBackPressed() {
         if(supportFragmentManager.backStackEntryCount>0) {
             supportFragmentManager.popBackStack()

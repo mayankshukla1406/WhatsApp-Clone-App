@@ -89,6 +89,10 @@ class ContactsFragment : Fragment(), IContactsViews {
         Toast.makeText(context, error, Toast.LENGTH_LONG).show()
     }
 
+    override fun getUserId(): String {
+        return ""
+    }
+
     override fun hideProgressBar() {
         binding?.let { it.contactsProgressBar.visibility = View.GONE }
     }

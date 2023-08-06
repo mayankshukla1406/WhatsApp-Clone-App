@@ -148,4 +148,8 @@ class OTPFragment : BottomSheetDialogFragment(),IViewsHandling {
     override fun dismissOtpBottomSheetDialogFragment() {
         dismiss()
     }
+
+    override fun getUserId(): String {
+        return ""
+    }
 }
