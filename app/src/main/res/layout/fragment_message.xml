@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E9EBF0"
-    tools:context=".presentation.HomePageLayout.Message.MessageFragment">
+    android:background="@drawable/message_screen_background"
+    tools:context=".presentation.HomePageLayout.Message.MessageFragment"
+    >
 
     <ProgressBar
         android:id="@+id/messageProgressBar"
@@ -17,8 +18,42 @@
         android:id="@+id/messageRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="2dp"
+        android:layout_marginVertical="5dp"
+        android:layout_above="@id/etMessageBox"
         />
+
+    <EditText
+        android:id="@+id/etMessageBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="6dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="11dp"
+        android:layout_toStartOf="@id/btSendMessage"
+        android:background="@drawable/background_message_edit_box"
+        android:hint="@string/type_your_message"
+        android:textColorHint="@color/GREY"
+        android:maxLines="5"
+        android:padding="15dp"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/btSendMessage"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/background_send_message_button"
+        android:src="@drawable/ic_arrow_forward_black_24dp" />
+
+
 
 
 </RelativeLayout>

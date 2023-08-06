@@ -1,5 +1,6 @@
 package com.example.whatsapp.data.repository
 
+import android.util.Log
 import com.example.whatsapp.data.database.UserDao
 import com.example.whatsapp.domain.model.ModelChat
 import com.example.whatsapp.domain.model.ModelMessage
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -79,12 +81,15 @@ class UserRespositoryImpl @Inject constructor(
         } catch (exception : Exception) {
             trySend(Resource.Error(exception.localizedMessage?:"An Error Occurred"))
         }
+    }.catch {
+        Log.d("Callback Flow Exception in Getting Chats",it.message?:"Flow Exception")
     }
 
     override fun getAllMessagesOfChat(chatId: String): Flow<Resource<List<ModelMessage>>> = callbackFlow {
         try {
             trySend(Resource.Loading)
-            val listener = firestore.collection("chats").document(chatId).collection("messages").addSnapshotListener { snapshot, exception ->
+            val collectionReference = firestore.collection("chats").document(chatId).collection("messages")
+            val listener = collectionReference.addSnapshotListener { snapshot, exception ->
                 if (exception != null) {
                     trySend(Resource.Error(exception.localizedMessage ?: "An Error Occurred"))
                     return@addSnapshotListener
@@ -103,6 +108,30 @@ class UserRespositoryImpl @Inject constructor(
             }
         } catch (exception : Exception) {
             trySend(Resource.Error(exception.localizedMessage?:"An Error Occurred"))
+        }
+    }.catch {
+        Log.d("Callback Flow Exception in Getting Messages",it.message?:"Flow Exception")
+    }
+
+    override fun sendMessage(chatId: String, messageModel : ModelMessage): Flow<Resource<Boolean>> = callbackFlow {
+        try {
+            trySend(Resource.Loading)
+            firestore
+                .collection("chats")
+                .document(chatId)
+                .collection("messages")
+                .document()
+                .set(messageModel)
+                .addOnSuccessListener {
+                    trySend(Resource.Success<Boolean>(true))
+                }
+                .addOnFailureListener {
+                    trySend(Resource.Error("User Profile Creation Failed due to ${it.localizedMessage}"))
+                }
+            awaitClose()
+
+        } catch (e: Exception) {
+            trySend(Resource.Error("User Profile Creation Failed due to ${e.localizedMessage}"))
         }
     }
 

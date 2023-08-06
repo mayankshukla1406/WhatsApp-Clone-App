@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
@@ -29,7 +28,7 @@ class ChatAdapter(var listener : IChatView) : ListAdapter<ModelChat,ChatAdapter.
 
     class ViewHolder(var view : View) : RecyclerView.ViewHolder(view) {
         fun bindView(modelChat: ModelChat,listener: IChatView) {
-            val chatCard : LinearLayout = view.findViewById(R.id.parent)
+            val chatCard : RelativeLayout = view.findViewById(R.id.parent)
             val chatName : TextView = view.findViewById(R.id.chatName)
             val chatImage : ImageView = view.findViewById(R.id.chatImage)
             val chatLastMessage : TextView = view.findViewById(R.id.chatLastMessage)
@@ -41,7 +40,7 @@ class ChatAdapter(var listener : IChatView) : ListAdapter<ModelChat,ChatAdapter.
             chatLastMessage.text = modelChat.chatLastMessage
             chatLastMessageTimeStamp.text = modelChat.chatLastMessageTimestamp
             chatCard.setOnClickListener {
-                listener.openMessageFragment()
+                listener.openMessageFragment(modelChat.chatId)
             }
         }
     }

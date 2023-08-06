@@ -12,6 +12,6 @@ interface UserRespository {
     fun getAllChats(userId : String) : Flow<Resource<List<ModelChat>>>
 
     fun getAllMessagesOfChat(chatId : String) : Flow<Resource<List<ModelMessage>>>
-
+    fun sendMessage(chatId: String, messageModel : ModelMessage): Flow<Resource<Boolean>>
 
 }

@@ -4,5 +4,5 @@ import com.example.whatsapp.presentation.IViewsHandling
 
 interface IChatView : IViewsHandling {
 
-    fun openMessageFragment() {}
+    fun openMessageFragment(chatId: String) {}
 }

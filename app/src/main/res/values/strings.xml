@@ -29,5 +29,6 @@
     <string name="invite_a_friend">Invite a friend</string>
     <string name="contacts">Contacts</string>
     <string name="refresh">Refresh</string>
+    <string name="type_your_message">Type your Message</string>
 
 </resources>

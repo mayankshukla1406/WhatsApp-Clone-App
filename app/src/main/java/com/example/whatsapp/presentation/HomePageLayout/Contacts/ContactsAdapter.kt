@@ -12,9 +12,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.whatsapp.R
 import com.example.whatsapp.domain.model.User
+import com.example.whatsapp.presentation.HomePageLayout.Chat.IChatView
 import com.example.whatsapp.util.OutlineProvider
 
-class ContactsAdapter : ListAdapter<User, ContactsAdapter.ViewHolder>(ContactDiffUtil()){
+class ContactsAdapter(var listener : IChatView) : ListAdapter<User, ContactsAdapter.ViewHolder>(ContactDiffUtil()){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.contact_card,parent,false)
@@ -23,12 +24,13 @@ class ContactsAdapter : ListAdapter<User, ContactsAdapter.ViewHolder>(ContactDif
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val contact = getItem(position)
-        holder.bindView(contact)
+        holder.bindView(contact,listener)
     }
 
     class ViewHolder(var view: View) : RecyclerView.ViewHolder(view) {
 
-        fun bindView(user : User) {
+        fun bindView(user : User,listener: IChatView) {
+            val contactCard : LinearLayout = view.findViewById(R.id.contactCard)
             val userName : TextView = view.findViewById(R.id.txtUserName)
             val userStatus : TextView = view.findViewById(R.id.txtUserStatus)
             val userProfile : ImageView = view.findViewById(R.id.userImage)
@@ -37,6 +39,9 @@ class ContactsAdapter : ListAdapter<User, ContactsAdapter.ViewHolder>(ContactDif
             userName.text = user.userName
             userStatus.text = user.userStatus
             Glide.with(itemView.context).load(user.userImage).into(userProfile)
+            contactCard.setOnClickListener {
+                listener.openMessageFragment("")
+            }
         }
     }
 

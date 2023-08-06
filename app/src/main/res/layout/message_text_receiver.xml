@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="5dp"
+    android:layout_margin="5dp"
     >
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -11,7 +12,10 @@
         android:layout_height="wrap_content"
         android:text="Sender Message"
         android:layout_alignParentStart="true"
+        android:textColor="@color/black"
+        android:textSize="14sp"
         android:textAlignment="textStart"
+        android:padding="10dp"
         android:background="@drawable/background_message_layout"
         />
 
