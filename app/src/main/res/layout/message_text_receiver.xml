@@ -10,6 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sender Message"
+        android:textColor = "@color/black"
+        android:padding="10dp"
         android:layout_alignParentStart="true"
         android:textAlignment="textStart"
         android:background="@drawable/background_message_layout"

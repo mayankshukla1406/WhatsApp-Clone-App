@@ -7,20 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.whatsapp.R
 import com.example.whatsapp.databinding.FragmentChatBinding
-import com.example.whatsapp.presentation.HomePageLayout.Contacts.ContactsAdapter
-import com.example.whatsapp.presentation.HomePageLayout.Contacts.ContactsFragment
+import com.example.whatsapp.databinding.MessageImageSenderBinding
 import com.example.whatsapp.presentation.HomePageLayout.Message.MessageFragment
 import com.example.whatsapp.presentation.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class ChatFragment : Fragment(), IChatView {
@@ -67,10 +62,8 @@ class ChatFragment : Fragment(), IChatView {
         return ""
     }
 
-    override fun openMessageFragment() {
-        super.openMessageFragment()
-        (activity as MainActivity).supportFragmentManager.beginTransaction()
-            .add(R.id.fragmentContainer, MessageFragment(), "message_fragment")
-            .addToBackStack("message_fragment").commit()
+    override fun openMessageFragment(chatId: String) {
+        super.openMessageFragment(chatId)
+        MessageFragment.newInstance(activity = activity as MainActivity,chatId)
     }
 }

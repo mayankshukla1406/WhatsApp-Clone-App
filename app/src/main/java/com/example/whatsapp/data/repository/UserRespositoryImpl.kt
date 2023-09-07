@@ -1,5 +1,6 @@
 package com.example.whatsapp.data.repository
 
+import android.util.Log
 import com.example.whatsapp.data.database.UserDao
 import com.example.whatsapp.domain.model.ModelChat
 import com.example.whatsapp.domain.model.ModelMessage
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -21,45 +23,46 @@ import javax.inject.Inject
 
 class UserRespositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val userDao: UserDao
+    private val userDao: UserDao,
 ) : UserRespository {
 
-    override fun getAllContacts(deviceContacts: List<String>): Flow<Resource<List<User>>> = channelFlow {
-        try {
-            trySend(Resource.Loading)
-            val contacts = userDao.getAllUsers().firstOrNull()
-            if(contacts.isNullOrEmpty()) {
-                for (contact in deviceContacts) {
-                    val query = firestore.collection("users").whereEqualTo("userNumber",contact)
-                    query.get().
-                    addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            for (document in task.result) {
-                                val user = getUserFromDocument(document)
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    userDao.insertUser(user)
-                                    userDao.getAllUsers().collect {
-                                        trySend(Resource.Success(it))
+    override fun getAllContacts(deviceContacts: List<String>): Flow<Resource<List<User>>> =
+        channelFlow {
+            try {
+                trySend(Resource.Loading)
+                val contacts = userDao.getAllUsers().firstOrNull()
+                if (contacts.isNullOrEmpty()) {
+                    for (contact in deviceContacts) {
+                        val query =
+                            firestore.collection("users").whereEqualTo("userNumber", contact)
+                        query.get().addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                for (document in task.result) {
+                                    val user = getUserFromDocument(document)
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        userDao.insertUser(user)
+                                        userDao.getAllUsers().collect {
+                                            trySend(Resource.Success(it))
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    awaitClose()
+                } else {
+                    trySend(Resource.Success(contacts))
                 }
-                awaitClose()
-            } else {
-                trySend(Resource.Success(contacts))
+            } catch (e: Exception) {
+                trySend(Resource.Error(e.localizedMessage ?: "An Error Occurred"))
             }
-        } catch (e: Exception) {
-            trySend(Resource.Error(e.localizedMessage?:"An Error Occurred"))
         }
-    }
 
-    override fun getAllChats(userId : String): Flow<Resource<List<ModelChat>>> = callbackFlow {
+    override fun getAllChats(userId: String): Flow<Resource<List<ModelChat>>> = callbackFlow {
         try {
             trySend(Resource.Loading)
-            val query = firestore.collection("chats").whereArrayContains("chatParticipants",userId)
-            val listener = query.addSnapshotListener { snapshot,exception->
+            val query = firestore.collection("chats").whereArrayContains("chatParticipants", userId)
+            val listener = query.addSnapshotListener { snapshot, exception ->
                 if (exception != null) {
                     trySend(Resource.Error(exception.localizedMessage ?: "An Error Occurred"))
                     return@addSnapshotListener
@@ -76,35 +79,64 @@ class UserRespositoryImpl @Inject constructor(
             awaitClose {
                 listener.remove()
             }
-        } catch (exception : Exception) {
-            trySend(Resource.Error(exception.localizedMessage?:"An Error Occurred"))
+        } catch (exception: Exception) {
+            trySend(Resource.Error(exception.localizedMessage ?: "An Error Occurred"))
         }
     }
 
-    override fun getAllMessagesOfChat(chatId: String): Flow<Resource<List<ModelMessage>>> = callbackFlow {
-        try {
-            trySend(Resource.Loading)
-            val listener = firestore.collection("chats").document(chatId).collection("messages").addSnapshotListener { snapshot, exception ->
-                if (exception != null) {
-                    trySend(Resource.Error(exception.localizedMessage ?: "An Error Occurred"))
-                    return@addSnapshotListener
-                }
-                snapshot?.let { documents ->
-                    val messages = mutableListOf<ModelMessage>()
-                    for (document in documents) {
-                        val messageModel = getMessageFromDocument(document)
-                        messages.add(messageModel)
+    override fun getAllMessagesOfChat(chatId: String): Flow<Resource<List<ModelMessage>>> =
+        callbackFlow {
+            try {
+                trySend(Resource.Loading)
+                val listener = firestore.collection("chats").document(chatId).collection("messages")
+                    .addSnapshotListener { snapshot, exception ->
+                        if (exception != null) {
+                            trySend(
+                                Resource.Error(
+                                    exception.localizedMessage ?: "An Error Occurred"
+                                )
+                            )
+                            return@addSnapshotListener
+                        }
+                        snapshot?.let { documents ->
+                            val messages = mutableListOf<ModelMessage>()
+                            for (document in documents) {
+                                val messageModel = getMessageFromDocument(document)
+                                messages.add(messageModel)
+                            }
+                            trySend(Resource.Success(messages))
+                        }
                     }
-                    trySend(Resource.Success(messages))
+                awaitClose {
+                    listener.remove()
                 }
+            } catch (exception: Exception) {
+                trySend(Resource.Error(exception.localizedMessage ?: "An Error Occurred"))
             }
-            awaitClose {
-                listener.remove()
-            }
-        } catch (exception : Exception) {
-            trySend(Resource.Error(exception.localizedMessage?:"An Error Occurred"))
+        }.catch {
+            Log.d("Error From Sending Message", it.localizedMessage ?: "Callback Flow Exception")
         }
-    }
+
+    override fun sendMessage(chatId: String, messageModel: ModelMessage): Flow<Resource<Boolean>> =
+        callbackFlow {
+            try {
+                trySend(Resource.Loading)
+                firestore.collection("chats")
+                    .document(chatId)
+                    .collection("messages")
+                    .document()
+                    .set(messageModel)
+                    .addOnSuccessListener {
+                        trySend(Resource.Success<Boolean>(true))
+                    }
+                    .addOnFailureListener {
+                        trySend(Resource.Error("Message Sending Failed due to ${it.localizedMessage}"))
+                    }
+                awaitClose()
+            } catch (e: java.lang.Exception) {
+                trySend(Resource.Error("Message Sending Failed due to ${e.localizedMessage}"))
+            }
+        }
 
     private fun getChatFromDocument(document: QueryDocumentSnapshot): ModelChat {
         return ModelChat(
@@ -117,8 +149,9 @@ class UserRespositoryImpl @Inject constructor(
         )
     }
 
-    private fun getUserFromDocument(document : QueryDocumentSnapshot) : User {
-        return User(userNumber = document.getString("userNumber"),
+    private fun getUserFromDocument(document: QueryDocumentSnapshot): User {
+        return User(
+            userNumber = document.getString("userNumber"),
             userName = document.getString("userName"),
             userImage = document.getString("userImage"),
             userStatus = document.getString("userStatus"),
@@ -126,7 +159,7 @@ class UserRespositoryImpl @Inject constructor(
         )
     }
 
-    private fun getMessageFromDocument(document: QueryDocumentSnapshot) : ModelMessage {
+    private fun getMessageFromDocument(document: QueryDocumentSnapshot): ModelMessage {
         return ModelMessage(
             messageData = document.get("messageData").toString(),
             messageType = document.get("messageType").toString(),

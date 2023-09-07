@@ -44,4 +44,9 @@ class MessageViewModel @Inject constructor(
         }
     }
     fun getUserId() = authUseCase.getUserId()
+    fun sendMessage(chatId: String, messageModel: ModelMessage) = viewModelScope.launch {
+        chatUseCase.sendMessage(chatId,messageModel).collectLatest {
+
+        }
+    }
 }

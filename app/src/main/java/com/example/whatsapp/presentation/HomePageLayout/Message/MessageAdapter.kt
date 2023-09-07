@@ -23,7 +23,7 @@ class MessageAdapter(var listener : IViewsHandling) : ListAdapter<ModelMessage,R
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         var inflater = LayoutInflater.from(parent.context)
-        return when(getItemViewType(viewType)) {
+        return when(viewType) {
             text_message_sender -> TextMessageViewHolderSender(MessageTextSenderBinding.inflate(inflater,parent,false))
             text_message_receiver -> TextMessageViewHolderReceiver(MessageTextReceiverBinding.inflate(inflater,parent,false))
             image_message_sender -> ImageMessageViewHolderSender(MessageImageSenderBinding.inflate(inflater,parent,false))
