@@ -98,7 +98,7 @@ class HomePageFragment : Fragment() {
         fabShowContacts.clipToOutline = true
         val window: Window = requireActivity().window
         window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.Green1)
-        binding.fabShowContacts.setOnClickListener {
+        fabShowContacts.setOnClickListener {
             requestReadContactsLauncher.launch(android.Manifest.permission.READ_CONTACTS)
         }
         return binding.root

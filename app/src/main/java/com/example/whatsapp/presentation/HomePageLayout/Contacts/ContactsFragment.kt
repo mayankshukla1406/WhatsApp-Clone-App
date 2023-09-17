@@ -56,7 +56,6 @@ class ContactsFragment : Fragment(), IContactsViews {
             if (deviceContacts.isNotEmpty()) {
                 val newList = ArrayList<String>()
                 newList.add("000000")
-                newList.add("1234567890")
                 newList.add("8765")
                 newList.add("12345")
                 newList.add("1234")
