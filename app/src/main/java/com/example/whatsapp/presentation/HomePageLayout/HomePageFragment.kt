@@ -1,6 +1,6 @@
 package com.example.whatsapp.presentation.HomePageLayout
 
-import android.graphics.Outline
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,20 +9,18 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
 import android.view.Window
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.add
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.whatsapp.R
 import com.example.whatsapp.databinding.FragmentHomePageBinding
 import com.example.whatsapp.presentation.HomePageLayout.Calls.CallsFragment
+import com.example.whatsapp.presentation.HomePageLayout.Calls.VideoCallActivity
 import com.example.whatsapp.presentation.HomePageLayout.Chat.ChatFragment
 import com.example.whatsapp.presentation.HomePageLayout.Contacts.ContactsFragment
 import com.example.whatsapp.presentation.HomePageLayout.Status.StatusFragment
@@ -31,7 +29,6 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -100,6 +97,7 @@ class HomePageFragment : Fragment() {
         window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.Green1)
         fabShowContacts.setOnClickListener {
             requestReadContactsLauncher.launch(android.Manifest.permission.READ_CONTACTS)
+
         }
         return binding.root
     }

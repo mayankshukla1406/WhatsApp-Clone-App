@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import com.example.whatsapp.R
 import com.example.whatsapp.databinding.ActivityMainBinding
 import com.example.whatsapp.presentation.HomePageLayout.HomePageFragment
@@ -112,14 +114,6 @@ class MainActivity : AppCompatActivity(),IViewsHandling {
 
     override fun getUserId() : String {
         return authenticationViewModel.getUserId()
-    }
-
-    override fun onBackPressed() {
-        if(supportFragmentManager.backStackEntryCount>0) {
-            supportFragmentManager.popBackStack()
-        } else {
-            super.onBackPressed()
-        }
     }
 }
 

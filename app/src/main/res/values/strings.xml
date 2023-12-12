@@ -30,5 +30,7 @@
     <string name="contacts">Contacts</string>
     <string name="refresh">Refresh</string>
     <string name="type_your_message">Type Your Message</string>
+    <string name="video_call">Video Call</string>
+    <string name="audio_call">Audio Call</string>
 
 </resources>
